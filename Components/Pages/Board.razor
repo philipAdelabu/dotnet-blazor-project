@@ -2,18 +2,21 @@
 
 <HeadContent>
     <style>
-        :root {
-            --board-bg: yellow;  /** the color of the board **/
-            --player1: red;      /** Player 1's piece color **/
-            --player2: blue;     /** Player 2's piece color **/
-        }
+            :root {
+                --board-bg: yellow;
+                /** the color of the board **/
+                --player1: red;
+                /** Player 1's piece color **/
+                --player2: blue;
+                /** Player 2's piece color **/
+            }
     </style>
 </HeadContent>
 
 <h3>Board</h3>
 
 <article>
-    @winnerMessage  <button style="@ResetStyle" @onclick="ResetGame">Reset the game</button>
+    @winnerMessage <button style="@ResetStyle" @onclick="ResetGame">Reset the game</button>
     <br />
     <span class="alert-danger">@errorMessage</span>
     <span class="alert-info">@CurrentTurn</span>
@@ -29,18 +32,28 @@
 
 <div>
     <div class="board">
-    @for (var i = 0; i < 42; i++)
-    {
-        <span class="container">
-            <span></span>
-        </span>
-    }
+        @for (var i = 0; i < 42; i++)
+        {
+            <span class="container">
+                <span></span>
+            </span>
+        }
     </div>
     @for (var i = 0; i < 42; i++)
     {
-       <span class="@pieces[i]"></span>
+        <span class="@pieces[i]"></span>
     }
 </div>
+<div>
+    <br /><br />
+    <span>@Player1Moves</span><br />
+    <span>@Player2Moves</span>
+    <br /><br />
+    <button style="@CheckScores; background-color: brown; color: white; border-radius: 2px" @onclick="@ClearScores">
+        clear wins memory
+    </button>
+</div>
+
 @code {
     private string[] pieces = new string[42];
 
@@ -52,9 +65,18 @@
     private string CurrentTurn => (winnerMessage == string.Empty) ? $"Player {State.PlayerTurn}'s Turn" : "";
     private string ResetStyle => (winnerMessage == string.Empty) ? "display: none;" : "";
 
+    private int Player1M => State.TheBoard.Count(x => x == 1);
+    private int Player2M => State.TheBoard.Count(x => x == 2);
+
+    private string Player1Moves => $"Player-1 moves: {Player1M} | wins:  {ConnectFour.GameState.PlayerScores[0]}";
+    private string Player2Moves => $"Player-2 moves: {Player2M} | wins:  {ConnectFour.GameState.PlayerScores[1]} ";
+
+    public int Player1Score { get; set; } = 0;
+    public int Player2Score { get; set; } = 0;
+
     private void PlayPiece(byte col)
     {
-       errorMessage = string.Empty;
+        errorMessage = string.Empty;
         try
         {
             var player = State.PlayerTurn;
@@ -87,4 +109,14 @@
         errorMessage = string.Empty;
         pieces = new string[42];
     }
+
+    void ClearScores()
+    {
+        ConnectFour.GameState.PlayerScores[0] = 0;
+        ConnectFour.GameState.PlayerScores[1] = 0;
+    }
+
+    private string CheckScores => (ConnectFour.GameState.PlayerScores[0] == 0 && ConnectFour.GameState.PlayerScores[1] == 0)
+? "display: none;" : "";
+    
 }
